@@ -116,20 +116,21 @@ print(" A  matrix")
 for row in A:
   print(row)  
 
+accFac=1
 while iterations<=1:
-  # V 1 1(V 1 2 ) =V[0][1]
-  print(V[iterations][busCnt])
   while busCnt<n:
+    
     V[iterations][busCnt]=A[busCnt]/(V[iterations-1][busCnt].conjugate())
     print("buscnt",busCnt)
+    print(V[iterations][busCnt])
     for q in range(n):
       if q!=busCnt:
-        if q<=iterations+1:
-          # b[0][0] V[1]0
+        if q<=busCnt:
           V[iterations][busCnt]-=(B[busCnt][q]*V[iterations][q])
         else:
           V[iterations][busCnt]-=(B[busCnt][q]*V[iterations-1][q])
       print(V[iterations][busCnt])
+    V[iterations][busCnt]=V[iterations-1][busCnt] + accFac*(V[iterations][busCnt]-V[iterations-1][busCnt])
     busCnt+=1
   iterations+=1
     
@@ -139,6 +140,7 @@ while iterations<=1:
 print("\n Admittance matrix Y:")
 for row in Y:
   print(row)
+# Printing the voltages at end of iterations matrix) for verification
 print("\n voltage V:")  
 for row in V:
   print(row)
