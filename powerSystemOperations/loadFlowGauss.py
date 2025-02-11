@@ -1,26 +1,9 @@
+import cmath
+import math
 import sys
+import os
 
-
-# filename = "input.txt"
-# print("Current Working Directory:", os.getcwd())
-# if os.path.exists(filename):
-#     sys.stdin = open(filename, "r")
-# else:
-#     print(f"Error: {filename} not found. Please check the file location.")
-#     exit(1)
-# Redirect standard input to read from file
 sys.stdin = open('./powerSystemOperations/input.txt', 'r')
-
-# # def get_complex_input(is_admittance):
-# #   while True:
-# #     try:
-# #       values = input("Enter complex values separated by space (real and imaginary parts): ").split()
-# #       if values[0].lower() == 'q':
-# #           return 'q'
-# #       real, imag =float(values[0]), float(values[1])
-# #       return complex(real, imag)
-# #     except (ValueError, IndexError):
-# #       print("Invalid input. Please enter the complex values in the format 'real imaginary'.")
 
 #Main code
 iterations=3
@@ -80,7 +63,6 @@ for i in range(n):
   # print(f"Enter net reactive power Q at generator {i+1} spacing the real and imaginary parts ")
   q=[float(val) for val in input().split()]
   Q[i]=complex(q[0],q[1])
-  # V[1]=cmath.rect(1,math.radians(60))
   
 for i in range(1,iterations+1):
   V[i][0]=V[i-1][0]
@@ -97,45 +79,29 @@ print(" Q  matrix")
 for row in Q:
   print(row)
 
-# A=[complex(0,0) for _ in range(n)]
-# B=[[complex(0,0) for _ in range(n)] for _ in range(n)]
 A = [(-1j * Q[i] + P[i]) / Y[i][i] for i in range(n)]
 B = [[complex(0, 0) if i == j else Y[i][j] / Y[i][i] for j in range(n)] for i in range(n)]
 
-# for i in range(n):
-#   A[i]=complex(0,-1)*Q[i]
-#   A[i]+=P[i]
-#   A[i]/=Y[i][i]
-  
-# for i in range(1,n):
-#   for j in range(n):
-#     if j==i:
-#       continue
-#     B[i][j]=Y[i][j]/Y[i][i]
 
 print(" A  matrix")
 for row in A:
   print(row)  
 
-accFac=1.6
-currIteration=1
-while currIteration<=iterations:
+currIterations=1
+while currIterations<=iterations:
+  # Skip slack bus (bus 0)
   busCnt=1
   while busCnt<n:
     
-    V[currIteration][busCnt]=A[busCnt]/(V[currIteration-1][busCnt].conjugate())
+    V[currIterations][busCnt]=A[busCnt]/(V[currIterations-1][busCnt].conjugate())
     print("buscnt",busCnt)
-    print(V[currIteration][busCnt])
+    print(V[currIterations][busCnt])
     for q in range(n):
       if q!=busCnt:
-        if q<=busCnt:
-          V[currIteration][busCnt]-=(B[busCnt][q]*V[currIteration][q])
-        else:
-          V[currIteration][busCnt]-=(B[busCnt][q]*V[currIteration-1][q])
-      print(V[currIteration][busCnt])
-    V[currIteration][busCnt]=V[currIteration-1][busCnt] + accFac*(V[currIteration][busCnt]-V[currIteration-1][busCnt])
+          V[currIterations][busCnt]-=(B[busCnt][q]*V[currIterations-1][q])
+      print(V[currIterations][busCnt])
     busCnt+=1
-  currIteration+=1
+  currIterations+=1
     
 
 
