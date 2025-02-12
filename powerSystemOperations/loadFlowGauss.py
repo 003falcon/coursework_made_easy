@@ -1,8 +1,5 @@
-import cmath
-import math
 import sys
-import os
-
+from loadFlowGaussSeidel import buildYbus
 sys.stdin = open('./powerSystemOperations/input.txt', 'r')
 
 #Main code
@@ -10,41 +7,6 @@ iterations=3
 # print("Enter number of buses")
 n=int(input())
 
-#Building Y Bus
-
-def buildYbus(n):
-  Y=[[ 0 for _ in range(n)] for _ in range(n)]
-  # print("Enter yes for entering admittance or no for impedance of lines")
-  isAdmittance=(input().lower()=="yes")
-
-  # print("Start entering admittances/impedances .To stop ,enter q.")
-  while(True):
-    # print("Enter source bus and destination bus of line admittance or 'q' to quit")
-    val=input().split()
-    if(val[0].lower()=='q'):
-      break
-    try:
-      [frm,to]=[int(x) for x in val]
-      frm-=1
-      to-=1
-    except ValueError:
-      print("Invalid input. Please enter the source and destination bus numbers.")
-      continue
-        
-    if isAdmittance:
-      # print("Enter admittance in complex form")
-      y=[float(val) for val in input().split()]
-      Y[frm][to]=-1*complex(y[0],y[1])
-    else:
-      # print("Enter impedance in complex form")
-      z=[float(val) for val in input().split()]
-      yFromZ=[round(z[0]/(z[0]**2 + z[1]**2),5),round(-z[1]/(z[0]**2 + z[1]**2),5)]
-      Y[frm][to]=-1*complex(yFromZ[0],yFromZ[1])
-    Y[to][frm]=Y[frm][to]
-    
-  for i in range(n):
-    Y[i][i]=-1*sum(Y[i])
-  return Y
 Y=buildYbus(n)
 
 V=[[complex(0,0) for _ in range(n)] for _ in range(iterations+1)]
