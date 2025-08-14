@@ -1,0 +1,141 @@
+/* body {
+  margin: 0;
+  font-family: 'Segoe UI', Arial, sans-serif;
+  background: #f0f0f0;
+  color: #333;
+}
+.cgpa-root {
+  padding: 30px;
+  font-family: inherit;
+  max-width: 650px;
+  margin: 40px auto;
+  background: #fff;
+  border-radius: 10px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+}
+.cgpa-section {
+  margin-bottom: 26px;
+}
+.cgpa-label {
+  margin-right: 12px;
+  font-weight: 500;
+}
+.cgpa-input {
+  width: 70px;
+  margin: 0 10px;
+  padding: 2px 6px;
+  border-radius: 4px;
+  border: 1px solid #ccc;
+}
+.cgpa-add-btn, .cgpa-calc-btn {
+  font-size: 15px;
+  padding: 4px 14px;
+  border: none;
+  border-radius: 6px;
+  background: #3887fd;
+  color: #fff;
+  cursor: pointer;
+  margin-left: 10px;
+}
+.cgpa-calc-btn {
+  font-size: 17px;
+  padding: 8px 24px;
+  margin-top: 16px;
+}
+.cgpa-add-btn:active, .cgpa-calc-btn:active {
+  background: #1d5bbf;
+}
+.cgpa-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 6px;
+  margin-bottom: 8px;
+}
+.cgpa-table th, .cgpa-table td {
+  padding: 4px 8px;
+  border: 1px solid #ddd;
+  text-align: center;
+}
+.cgpa-result {
+  min-height: 80px;
+  background: #f7f7fa;
+  padding: 14px;
+  border-radius: 8px;
+  margin-top: 12px;
+}
+.cgpa-footer {
+  font-size: 12px;
+  color: #888;
+  margin-top: 30px;
+}
+.cgpa-footer hr {
+  border: none;
+  border-top: 1px solid #e0e0e0;
+  margin: 16px 0;
+} */
+body {
+  margin: 0;
+  font-family: "Segoe UI", Arial, sans-serif;
+  background: #16be19;
+  color: #ffffff;
+}
+.cgpa-root {
+  padding: 30px;
+  font-family: inherit;
+  max-width: 600px;
+  margin: 40px auto;
+  background:linear-gradient(45deg, #021575, #29368a);
+  border-radius: 10px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+}
+.cgpa-fieldset {
+  border: 1px solid #aaa;
+  border-radius: 8px;
+  padding: 15px;
+  max-height: 300px;
+  overflow-y: auto;
+  background: #fafbfc;
+}
+.cgpa-row {
+  margin: 8px 0;
+}
+.cgpa-label {
+  margin-right: 8px;
+}
+.cgpa-input {
+  width: 60px;
+  margin-left: 10px;
+  padding: 2px 6px;
+  border-radius: 4px;
+  border: 1px solid #ccc;
+}
+.cgpa-button {
+  font-size: 18px;
+  padding: 8px 20px;
+  border: none;
+  border-radius: 6px;
+  background: #3887fd;
+  color: #fff;
+  cursor: pointer;
+  margin-top: 12px;
+}
+.cgpa-button:active {
+  background: #1d5bbf;
+}
+.cgpa-result {
+  min-height: 60px;
+  background: #f7f7fa;
+  padding: 15px;
+  border-radius: 8px;
+  margin-top: 10px;
+}
+.cgpa-footer {
+  font-size: 12px;
+  color: #888;
+  margin-top: 30px;
+}
+.cgpa-footer hr {
+  border: none;
+  border-top: 1px solid #e0e0e0;
+  margin: 16px 0;
+}
