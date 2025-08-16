@@ -84,9 +84,10 @@ function CGPACalculator() {
     }
   };
   let curSemCourseNames = [];
-  currentSemCourses.forEach(({ num, name }) => {
-    for (let i = 0; i < num; ++i) curSemCourseNames.push(name);
-  });
+curSemCourseNames = currentSemCourses.map(({ name }) => name);
+  // currentSemCourses.forEach(({ num, name }) => {
+  //   for (let i = 0; i < num; ++i) curSemCourseNames.push(name);
+  // });
 
   // Remove a current semester course row
   const handleRemoveCurSemRow = (idx) => {
@@ -108,11 +109,12 @@ function CGPACalculator() {
     // 2. Compute current sem
     // let curSemTotalCourses = 0;
     let curSemCreditsList = [];
-    currentSemCourses.forEach(({ credit }) => {
-      // for (let i = 0; i < num; ++i) 
-      curSemCreditsList.push(credit);
-      // curSemTotalCourses += num;
-    });
+    curSemCreditsList = currentSemCourses.map(({ credit }) => credit);
+    // currentSemCourses.forEach(({ credit }) => {
+    //   // for (let i = 0; i < num; ++i) 
+    //   curSemCreditsList.push(credit);
+    //   // curSemTotalCourses += num;
+    // });
 
     if (curSemCreditsList.length === 0) {
       setResult(
@@ -186,7 +188,7 @@ function CGPACalculator() {
             >
               {gradesArr.map((g, gi) => (
                 <span key={gi}>
-                  {curSemCourseNames[gi]} ({curSemCreditsList[gi]} credit):{" "}
+                  {curSemCourseNames[gi]} :{" "}
                   <b>{g}</b> {gi < gradesArr.length - 1 ? " | " : ""}
                 </span>
               ))}
