@@ -11,7 +11,7 @@ const round2 = (x) => Math.round(x * 100) / 100;
 
 function CGPACalculator() {
   // Step 1: Desired CGPA
-  const [desiredCG, setDesiredCG] = useState(9.00);
+  const [desiredCG, setDesiredCG] = useState(9.0);
 
   // Step 2: Completed courses credit types
   const [creditInputs, setCreditInputs] = useState([4, 3, 2, 1]);
@@ -27,6 +27,7 @@ function CGPACalculator() {
 
   // Step 4: Current semester info
   const [currentSemCourses, setCurrentSemCourses] = useState([]);
+  const [curSemCourseName, setCurSemCourseName] = useState("");
   const [curSemNumCourses, setCurSemNumCourses] = useState("");
   const [curSemCourseCredit, setCurSemCourseCredit] = useState("");
 
@@ -67,16 +68,25 @@ function CGPACalculator() {
     }));
   };
 
+  // const curSemCourses = ["OE", "HVDC", "DE"];
   // Add a current semester course row
   const handleAddCurSemCourse = () => {
-    const n = Number(curSemNumCourses);
+    // const n = Number(curSemNumCourses);
     const credit = parseFloat(curSemCourseCredit);
-    if (n > 0 && credit > 0) {
-      setCurrentSemCourses([...currentSemCourses, { num: n, credit }]);
-      setCurSemNumCourses("");
+    const name =
+      curSemCourseName.trim() || `Course ${currentSemCourses.length + 1}`;
+    // n > 0 && num: n,
+    if (credit > 0) {
+      setCurrentSemCourses([...currentSemCourses, { credit, name: name }]);
+      // setCurSemNumCourses("");
       setCurSemCourseCredit("");
+      setCurSemCourseName("");
     }
   };
+  let curSemCourseNames = [];
+  currentSemCourses.forEach(({ num, name }) => {
+    for (let i = 0; i < num; ++i) curSemCourseNames.push(name);
+  });
 
   // Remove a current semester course row
   const handleRemoveCurSemRow = (idx) => {
@@ -96,11 +106,12 @@ function CGPACalculator() {
       }
     });
     // 2. Compute current sem
-    let curSemTotalCourses = 0;
+    // let curSemTotalCourses = 0;
     let curSemCreditsList = [];
-    currentSemCourses.forEach(({ num, credit }) => {
-      for (let i = 0; i < num; ++i) curSemCreditsList.push(credit);
-      curSemTotalCourses += num;
+    currentSemCourses.forEach(({ credit }) => {
+      // for (let i = 0; i < num; ++i) 
+      curSemCreditsList.push(credit);
+      // curSemTotalCourses += num;
     });
 
     if (curSemCreditsList.length === 0) {
@@ -175,8 +186,8 @@ function CGPACalculator() {
             >
               {gradesArr.map((g, gi) => (
                 <span key={gi}>
-                  Course {gi + 1} ({curSemCreditsList[gi]} credit): <b>{g}</b>{" "}
-                  {gi < gradesArr.length - 1 ? " | " : ""}
+                  {curSemCourseNames[gi]} ({curSemCreditsList[gi]} credit):{" "}
+                  <b>{g}</b> {gi < gradesArr.length - 1 ? " | " : ""}
                 </span>
               ))}
             </div>
@@ -249,7 +260,7 @@ function CGPACalculator() {
             value={newCredit}
             onChange={(e) => setNewCredit(e.target.value)}
           />
-        
+
           <button
             className="new-credit-add-button"
             type="button"
@@ -263,7 +274,9 @@ function CGPACalculator() {
       {/* Step 3: Grades */}
       <div className="cgpa-section">
         <div style={{ marginBottom: 25 }}>
-          <b><u>Enter Grades for Completed Courses</u></b>
+          <b>
+            <u>Enter Grades for Completed Courses</u>
+          </b>
         </div>
         <div>
           {creditInputs.map(
@@ -291,18 +304,25 @@ function CGPACalculator() {
 
       {/* Step 4: Current Semester Info */}
       <div className="cgpa-section">
-        <div style={{ marginBottom: 15 }}>
-          Add Current Semester Courses
-        </div>
+        <div style={{ marginBottom: 15 }}>Add Current Semester Courses</div>
         <div>
+          {/* <div> */}
           <input
+            className="course-name-input"
+            type="text"
+            placeholder="Course name"
+            value={curSemCourseName}
+            onChange={(e) => setCurSemCourseName(e.target.value)}
+          />
+          {/* </div> */}
+          {/* <input
             className="num-courses-input"
             type="number"
             min="1"
             placeholder="No. of courses"
             value={curSemNumCourses}
             onChange={(e) => setCurSemNumCourses(e.target.value)}
-          />
+          /> */}
           <input
             className="credit-input"
             type="number"
@@ -325,7 +345,7 @@ function CGPACalculator() {
             <thead>
               <tr>
                 <th>#</th>
-                <th>No. of Courses</th>
+                <th>Course Name</th>
                 <th>Credit</th>
                 <th>Remove</th>
               </tr>
@@ -334,7 +354,7 @@ function CGPACalculator() {
               {currentSemCourses.map((row, idx) => (
                 <tr key={idx}>
                   <td>{idx + 1}</td>
-                  <td>{row.num}</td>
+                  <td>{row.name}</td>
                   <td>{row.credit}</td>
                   <td>
                     <button
@@ -344,8 +364,7 @@ function CGPACalculator() {
                         border: "none",
                         borderRadius: 4,
                         padding: "2px 8px",
-                        cursor:"pointer"
-
+                        cursor: "pointer",
                       }}
                       onClick={() => handleRemoveCurSemRow(idx)}
                     >
