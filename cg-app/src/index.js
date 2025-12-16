@@ -1,93 +1,65 @@
-import React, { useState } from "react";
+import { useState, useEffect } from "react";
 import ReactDOM from "react-dom/client";
 import "./styles.css";
 
 // Allowed grade range
-const GRADE_MIN = 7;
+const GRADE_MIN = 5;
 const GRADE_MAX = 10;
 
-// Utility to round to 2 decimals
-const round2 = (x) => Math.round(x * 100) / 100;
+
+// This works just like useState, but saves to the browser's local storage.
+function useStickyState(defaultValue, key) {
+  const [value, setValue] = useState(() => {
+    const stickyValue = window.localStorage.getItem(key);
+    return stickyValue !== null ? JSON.parse(stickyValue) : defaultValue;
+  });
+
+  useEffect(() => {
+    window.localStorage.setItem(key, JSON.stringify(value));
+  }, [key, value]);
+
+  return [value, setValue];
+}
+
+// Utility to calculate variance
+const getVariance = (arr) => {
+  if (arr.length === 0) return 0;
+  const mean = arr.reduce((a, b) => a + b, 0) / arr.length;
+  return (
+    arr.reduce((a, b) => a + Math.pow(b - mean, 2), 0) / arr.length
+  );
+};
 
 function CGPACalculator() {
-  // Step 1: Desired CGPA
-  const [desiredCG, setDesiredCG] = useState(9.0);
+  // Step 1: Desired CGPA (Persisted)
+  const [desiredCG, setDesiredCG] = useStickyState(9.0, "cgpa_desired");
+  const [curCG, setCurCG] = useStickyState(5, "cgpa_current");
+  const [completedCredits, setcompletedCredits] = useStickyState(0, "cgpa_completed_credits");
 
-  // Step 2: Completed courses credit types
-  const [creditInputs, setCreditInputs] = useState([4, 3, 2, 1]);
-  const [newCredit, setNewCredit] = useState("");
-  const [coursesPerCredit, setCoursesPerCredit] = useState({
-    4: 0,
-    3: 0,
-    2: 0,
-    1: 0,
-  });
-  // Step 3: Grades for completed courses
-  const [grades, setGrades] = useState({}); // {credit: [grade,...]}
-
-  // Step 4: Current semester info
-  const [currentSemCourses, setCurrentSemCourses] = useState([]);
+  // Step 4: Current semester info (Courses List is Persisted)
+  const [currentSemCourses, setCurrentSemCourses] = useStickyState([], "cgpa_current_courses");
+  
+  // Temporary inputs (No need to persist these)
   const [curSemCourseName, setCurSemCourseName] = useState("");
-  const [curSemNumCourses, setCurSemNumCourses] = useState("");
   const [curSemCourseCredit, setCurSemCourseCredit] = useState("");
 
-  // Result
+  // Result (No need to persist, can re-calculate)
   const [result, setResult] = useState(null);
 
-  // Add a new custom credit value
-  const handleAddCredit = () => {
-    const c = parseFloat(newCredit);
-    if (isNaN(c) || c <= 0) return;
-    if (!creditInputs.includes(c)) {
-      setCreditInputs([...creditInputs, c].sort((a, b) => b - a));
-      setCoursesPerCredit({ ...coursesPerCredit, [c]: 0 });
-    }
-    setNewCredit("");
-  };
-
-  // Update number of courses for each credit
-  const handleCoursesChange = (c, val) => {
-    const n = Number(val);
-    setCoursesPerCredit((prev) => ({
-      ...prev,
-      [c]: n,
-    }));
-    setGrades((prev) => ({
-      ...prev,
-      [c]: (prev[c] || [])
-        .slice(0, n)
-        .concat(Array(Math.max(0, n - (prev[c]?.length || 0))).fill(8)),
-    }));
-  };
-
-  // Update grades for completed courses
-  const handleGradeChange = (c, i, val) => {
-    setGrades((prev) => ({
-      ...prev,
-      [c]: prev[c].map((g, j) => (j === i ? Number(val) : g)),
-    }));
-  };
-
-  // const curSemCourses = ["OE", "HVDC", "DE"];
-  // Add a current semester course row
   const handleAddCurSemCourse = () => {
-    // const n = Number(curSemNumCourses);
     const credit = parseFloat(curSemCourseCredit);
     const name =
       curSemCourseName.trim() || `Course ${currentSemCourses.length + 1}`;
-    // n > 0 && num: n,
+    
     if (credit > 0) {
       setCurrentSemCourses([...currentSemCourses, { credit, name: name }]);
-      // setCurSemNumCourses("");
       setCurSemCourseCredit("");
       setCurSemCourseName("");
     }
   };
+
   let curSemCourseNames = [];
-curSemCourseNames = currentSemCourses.map(({ name }) => name);
-  // currentSemCourses.forEach(({ num, name }) => {
-  //   for (let i = 0; i < num; ++i) curSemCourseNames.push(name);
-  // });
+  curSemCourseNames = currentSemCourses.map(({ name }) => name);
 
   // Remove a current semester course row
   const handleRemoveCurSemRow = (idx) => {
@@ -96,31 +68,23 @@ curSemCourseNames = currentSemCourses.map(({ name }) => name);
 
   // Compute the possibilities
   const handleCompute = () => {
+    const timestamp = new Date().toLocaleTimeString(); 
+
     // 1. Compute completed
-    let totalCredits = 0,
-      weightedSum = 0;
-    creditInputs.forEach((c) => {
-      const num = coursesPerCredit[c] | 0;
-      if (num > 0) {
-        totalCredits += c * num;
-        (grades[c] || []).forEach((g) => (weightedSum += c * g));
-      }
-    });
-    // 2. Compute current sem
-    // let curSemTotalCourses = 0;
+    let totalCredits = completedCredits,
+      weightedSum = completedCredits * curCG;
+
     let curSemCreditsList = [];
     curSemCreditsList = currentSemCourses.map(({ credit }) => credit);
-    // currentSemCourses.forEach(({ credit }) => {
-    //   // for (let i = 0; i < num; ++i) 
-    //   curSemCreditsList.push(credit);
-    //   // curSemTotalCourses += num;
-    // });
 
     if (curSemCreditsList.length === 0) {
       setResult(
-        <span style={{ color: "red" }}>
-          Add at least one current semester course!
-        </span>
+        <div key={Date.now()} className="fade-in">
+          <span style={{ color: "red" }}>
+            Add at least one current semester course! <br/>
+            <small style={{color: "#999"}}>(Checked at {timestamp})</small>
+          </span>
+        </div>
       );
       return;
     }
@@ -130,25 +94,29 @@ curSemCourseNames = currentSemCourses.map(({ name }) => name);
     const targetSum = desiredCG * totalCreditsAll;
     const neededSum = targetSum - weightedSum;
 
-    // If already achieved
+    // Check if theoretically possible
     if (
       neededSum <=
       curSemCreditsList.length * GRADE_MAX * Math.max(...curSemCreditsList)
     ) {
-      // Brute force all possible grade assignments for current sem (small N only)
-      // For each course, grades can be 7..10. Try all combinations.
-      // Stop if more than 1000 solutions.
+      // Brute force all possible grade assignments for current sem
       let count = 0,
         scenarios = [];
-      const maxScenarios = 10;
+      const maxScenariosToShow = 10;
+      const bufferSize = 500; 
       const maxCombinations = 1e5;
 
       const dfs = (idx, accSum, accGrades) => {
         if (count > maxCombinations) return;
+        
+        // Optimization: Pruning
+        const remainingCredits = curSemCreditsList.slice(idx).reduce((a,b)=>a+b, 0);
+        if (accSum + remainingCredits * GRADE_MAX < neededSum - 1e-6) return;
+
         if (idx === curSemCreditsList.length) {
           if (accSum >= neededSum - 1e-6) {
             count++;
-            if (scenarios.length < maxScenarios) scenarios.push([...accGrades]);
+            if (scenarios.length < bufferSize) scenarios.push([...accGrades]);
           }
           return;
         }
@@ -156,52 +124,78 @@ curSemCourseNames = currentSemCourses.map(({ name }) => name);
           dfs(idx + 1, accSum + curSemCreditsList[idx] * g, [...accGrades, g]);
         }
       };
+      
       dfs(0, 0, []);
-      if (count === 0) {
+
+      if (scenarios.length === 0) {
         setResult(
-          <span style={{ color: "red" }}>
-            Sorry, target CG cannot be achieved with the current configuration.
-          </span>
+          <div key={Date.now()} className="fade-in">
+            <span style={{ color: "red" }}>
+              Sorry, target CG cannot be achieved with the current configuration.
+            </span>
+            <br/>
+            <small style={{color: "#888"}}>Checked at {timestamp}</small>
+          </div>
         );
         return;
       }
+
+      // --- SORTING LOGIC BY VARIANCE---
+      scenarios.sort((a, b) => {
+        const varA = getVariance(a);
+        const varB = getVariance(b);
+        return varA - varB;
+      });
+
+      const displayScenarios = scenarios.slice(0, maxScenariosToShow);
+
       setResult(
-        <div>
+        <div key={Date.now()} className="fade-in"> 
           <div style={{ marginBottom: 8 }}>
             <b>Possible ways to achieve target CG: {count}</b>
             <br />
-            {count > maxScenarios && (
-              <span style={{ color: "#888" }}>
-                (Showing {maxScenarios} possible grade scenarios)
-              </span>
-            )}
+            <span style={{ color: "#555", fontSize: "0.9em" }}>
+              (Sorted by most balanced grades first)
+            </span>
           </div>
-          {scenarios.map((gradesArr, si) => (
+          {displayScenarios.map((gradesArr, si) => (
             <div
               key={si}
               style={{
                 margin: "6px 0",
                 background: "#f1f7ff",
-                padding: "5px 10px",
+                padding: "8px 10px",
                 borderRadius: 4,
+                borderLeft: "4px solid #007bff",
+                display: "flex",
+                flexWrap: "wrap",
+                gap: "10px"
               }}
             >
               {gradesArr.map((g, gi) => (
                 <span key={gi}>
-                  {curSemCourseNames[gi]} :{" "}
-                  <b>{g}</b> {gi < gradesArr.length - 1 ? " | " : ""}
+                  {curSemCourseNames[gi]}: <b>{g}</b>
                 </span>
               ))}
             </div>
           ))}
+          <div style={{marginTop: "10px", fontSize: "0.8em", color: "#aaa"}}>
+             Calculation performed at {timestamp}
+          </div>
         </div>
       );
       return;
     } else {
       setResult(
-        <span style={{ color: "red" }}>
-          Sorry, target CG cannot be achieved with the current configuration.
-        </span>
+        <div key={Date.now()} className="fade-in">
+          <span style={{ color: "red", fontWeight: "bold" }}>
+            Sorry, target CG cannot be achieved.
+          </span>
+          <br/>
+          <span style={{color: "red"}}>Max possible sum exceeded.</span>
+          <br/>
+          <small style={{color: "#888"}}>Checked at {timestamp}</small>
+        </div>
       );
     }
   };
@@ -212,7 +206,6 @@ curSemCourseNames = currentSemCourses.map(({ name }) => name);
         CGPA Target Calculator
       </h2>
 
-      {/* Step 1: Desired CGPA */}
       <div className="cgpa-section">
         <label className="cgpa-label">
           Desired CGPA:
@@ -227,88 +220,40 @@ curSemCourseNames = currentSemCourses.map(({ name }) => name);
           />
         </label>
       </div>
-
-      {/* Step 2: Completed Courses */}
-      <div className="cgpa-section">
-        <div style={{ marginBottom: 8 }}>
-          <b>Completed Courses (before this semester):</b>
-        </div>
-        <div style={{ marginBottom: 8 }}>
-          {creditInputs.map((c, i) => (
-            <span key={c} style={{ marginRight: 14 }}>
-              <label style={{ display: "flex", alignItems: "center" }}>
-                {c}-credit:
-                <input
-                  style={{ marginLeft: "30 px" }}
-                  className="credit-input"
-                  type="number"
-                  min="0"
-                  max="150"
-                  value={coursesPerCredit[c] ?? 0}
-                  onChange={(e) => handleCoursesChange(c, e.target.value)}
-                />
-              </label>
-            </span>
-          ))}
-        </div>
-        <div className="new-credit">
+      <div>
+        <label className="cgpa-label">
+          Current CGPA:
           <input
-            className="new-credit-input"
+            className="cgpa-input"
             type="number"
-            placeholder="e.g. 1.5"
-            min="0.1"
+            step="0.01"
+            min="5"
             max="10"
-            step="0.1"
-            value={newCredit}
-            onChange={(e) => setNewCredit(e.target.value)}
+            value={curCG}
+            onChange={(e) => setCurCG(Number(e.target.value))}
           />
-
-          <button
-            className="new-credit-add-button"
-            type="button"
-            onClick={handleAddCredit}
-          >
-            Add Credit Type
-          </button>
-        </div>
+        </label>
       </div>
 
-      {/* Step 3: Grades */}
       <div className="cgpa-section">
-        <div style={{ marginBottom: 25 }}>
-          <b>
-            <u>Enter Grades for Completed Courses</u>
-          </b>
-        </div>
-        <div>
-          {creditInputs.map(
-            (c) =>
-              coursesPerCredit[c] > 0 && (
-                <div key={c} style={{ marginBottom: 8 }}>
-                  <b>{c}-credit:</b>
-                  {Array.from({ length: coursesPerCredit[c] }, (_, i) => (
-                    <input
-                      key={i}
-                      className="cgpa-input"
-                      type="number"
-                      min={GRADE_MIN}
-                      max={GRADE_MAX}
-                      value={grades[c]?.[i] ?? 8}
-                      onChange={(e) => handleGradeChange(c, i, e.target.value)}
-                      style={{ marginLeft: 8, marginRight: 8 }}
-                    />
-                  ))}
-                </div>
-              )
-          )}
-        </div>
+        <label className="cgpa-label">
+          Completed Credits:
+          <input
+            className="cgpa-input"
+            type="number"
+            step="1"
+            min="0"
+            max="140"
+            value={completedCredits}
+            onChange={(e) => setcompletedCredits(Number(e.target.value))}
+          />
+        </label>
       </div>
 
-      {/* Step 4: Current Semester Info */}
+      {/* Current Semester Info */}
       <div className="cgpa-section">
         <div style={{ marginBottom: 15 }}>Add Current Semester Courses</div>
-        <div>
-          {/* <div> */}
+        <div className="cur-sem-inputs">
           <input
             className="course-name-input"
             type="text"
@@ -316,21 +261,13 @@ curSemCourseNames = currentSemCourses.map(({ name }) => name);
             value={curSemCourseName}
             onChange={(e) => setCurSemCourseName(e.target.value)}
           />
-          {/* </div> */}
-          {/* <input
-            className="num-courses-input"
-            type="number"
-            min="1"
-            placeholder="No. of courses"
-            value={curSemNumCourses}
-            onChange={(e) => setCurSemNumCourses(e.target.value)}
-          /> */}
+
           <input
             className="credit-input"
             type="number"
-            min="0.1"
-            step="0.1"
-            placeholder="credits"
+            min="1.5"
+            step="0.5"
+            placeholder="Credits "
             value={curSemCourseCredit}
             onChange={(e) => setCurSemCourseCredit(e.target.value)}
           />
@@ -380,18 +317,27 @@ curSemCourseNames = currentSemCourses.map(({ name }) => name);
         )}
       </div>
 
-      {/* Step 5: Compute */}
+      {/*  Compute */}
       <button className="cgpa-calc-button" onClick={handleCompute}>
         Compute Scenarios
       </button>
-      <div className="cgpa-result">{result}</div>
+      
+      {/* Result Container */}
+      <div className="cgpa-result">
+        {result}
+      </div>
+
       <div className="cgpa-footer">
         <hr />
         Built with React. <br />
-        <b>Note:</b> For large number of courses, only a sample of possible
-        scenarios will be shown.
+        <b>Note:</b> For large number of possibilities, only 10 of possible
+        scenarios are shown.
+        <p>Have an idea?    <a href="https://github.com/003falcon/coursework_made_easy/tree/main/cg-app" style={{color: "inherit",
+  cursor:"pointer"}} target="_blank" rel="noopener noreferrer">Contribute</a>
+    </p>
+        
       </div>
-    </div>
+      </div>
   );
 }
 
