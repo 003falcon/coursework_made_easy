@@ -1,70 +1,82 @@
-# Getting Started with Create React App
+# CGPA Target Calculator 🎯
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+A React-based utility tool designed to help students calculate the necessary grades they need in their current semester courses to achieve a specific target CGPA.
 
-## Available Scripts
+The application uses a smart algorithm to generate possible grade scenarios, prioritizing "realistic" (balanced) outcomes over extreme variance.
 
-In the project directory, you can run:
+##  Features
 
-### `npm start`
+- **Target Analysis**: Input your Current CGPA, Completed Credits, and Desired CGPA to see if your goal is mathematically possible.
+- **Scenario Generator**: Calculates multiple combinations of grades (from 5 to 10) for your current courses that will result in your target CGPA.
+- **Smart Sorting**: Uses variance calculation to sort scenarios. It displays "balanced" grade distributions (e.g., all 8s) before extreme ones (e.g., mix of 5s and 10s).
+- **Data Persistence**: Uses `localStorage` to save your inputs (Current CGPA, Credits, Course List). Your data won't vanish when you refresh the page.
+- **Responsive Design**: Fully optimized for mobile and desktop use.
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+## Tech Stack
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+- **Frontend**: React.js
+- **Styling**: CSS3 (Flexbox, Mobile-first responsive design)
+- **State Management**: React Hooks (`useState`, `useEffect`) + Custom Hooks for persistence.
 
-### `npm test`
+## Installation & Setup
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+To run this project locally, follow these steps:
+ [https://github.com/003falcon/coursework_made_easy.git](https://github.com/003falcon/coursework_made_easy.git)
+1. **Clone the repository**
+   ```bash
+   git clone https://github.com/003falcon/coursework_made_easy.git
+   ```
+2. **Navigate to directory**
+    ```bash
+   cd coursework_made_easy/cg-app
+   ```
 
-### `npm run build`
+3. **Install Dependencies** (Make sure you have Node.js installed)
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+    ```bash
+    npm install
+    ```
+4. **Start the Development Server**
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+    ```Bash
+    npm start
+    ```
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+5. Open http://localhost:3000 to view it in the browser.
 
-### `npm run eject`
+## How It Works
+### Input Data:
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+Desired CGPA: The cumulative grade point average you want to end up with.
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+Current CGPA: Your CGPA up to the previous semester.
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+Completed Credits: Total credits cleared so far.
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+Add Courses:
 
-## Learn More
+Add the courses you are taking this semester along with their credit values.
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+### Compute:
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+The algorithm calculates the required "Weighted Sum" needed from the current semester.
 
-### Code Splitting
+It runs a Depth-First Search (DFS) to find combinations of grades (ranging from 5 to 10) that satisfy the requirement.
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
+Results are sorted by Variance, showing the most consistent grade paths first.
 
-### Analyzing the Bundle Size
+## Contributing
+Contributions are welcome! If you find a bug or want to add a feature (like support for different grading scales), feel free to open an issue or submit a pull request.
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
+- Fork the Project
 
-### Making a Progressive Web App
+- Create your Feature Branch (git checkout -b feature/AmazingFeature)
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
+- Commit your Changes (git commit -m 'Add some AmazingFeature')
 
-### Advanced Configuration
+- Push to the Branch (git push origin feature/AmazingFeature)
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
+- Open a Pull Request
 
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+###  License
+Distributed under the MIT License.
